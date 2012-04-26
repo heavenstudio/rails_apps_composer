@@ -15,28 +15,40 @@ end
 if recipes.include? 'guard'
   gem 'guard', '>= 0.6.2', :group => :development
 
-  prepend_file 'Gemfile' do <<-RUBY
+  case config['notify']
+  when 'mac'
+    gem 'rb-fsevent', :group => :development
+    gem 'growl', :group => :development
+  when 'linux'
+    gem 'libnotify', :group => :development
+    gem 'rb-inotify', :group => :development
+  when 'windows'
+    gem 'rb-fchange', :group => :development
+    gem 'win32console', :group => :development
+    gem 'rb-notifu', :group => :development
+  when 'all'
+    prepend_file 'Gemfile' do <<-RUBY
 require 'rbconfig'
 HOST_OS = RbConfig::CONFIG['host_os']
 
 RUBY
-  end
+    end
+    append_file 'Gemfile' do <<-RUBY
 
-  append_file 'Gemfile' do <<-RUBY
-  # need newline here!
 case HOST_OS
-  when /darwin/i
-    gem 'rb-fsevent', :group => :development
-    gem 'growl', :group => :development
-  when /linux/i
-    gem 'libnotify', :group => :development
-    gem 'rb-inotify', :group => :development
-  when /mswin|windows/i
-    gem 'rb-fchange', :group => :development
-    gem 'win32console', :group => :development
-    gem 'rb-notifu', :group => :development
+when /darwin/i
+  gem 'rb-fsevent', :group => :development
+  gem 'growl', :group => :development
+when /linux/i
+  gem 'libnotify', :group => :development
+  gem 'rb-inotify', :group => :development
+when /mswin|windows/i
+  gem 'rb-fchange', :group => :development
+  gem 'win32console', :group => :development
+  gem 'rb-notifu', :group => :development
 end
-  RUBY
+RUBY
+    end
   end
 
   def guards
@@ -73,9 +85,6 @@ end
 
   after_bundler do
     run 'guard init'
-    guards.each do |name|
-      run "guard init #{name}"
-    end
   end
 
 else
@@ -97,3 +106,7 @@ config:
       type: multiple_choice
       prompt: Would you like to use Guard to automate your workflow?
       choices: [["No", no], ["Guard default configuration", standard], ["Guard with LiveReload", LiveReload]]
+  - notify:
+      prompt: Would you to add notifications? (OS and library dependent)
+      type: multiple_choice
+      choices: [["No", no], ["yes, for mac (growl and rb-fsevent)", mac], ["yes, for linux (libnotify and rb-inotify)", linux], ["yes, for windows (rb-fchange, win32console and rb-notifu)", windows], ["yes, all of them with os specific targets (breaks heroku)", all]]

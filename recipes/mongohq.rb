@@ -1,15 +1,9 @@
-if config['use_heroku']
-  
+if config['use_heroku']  
   header = <<-YAML
 <% if ENV['MONGOHQ_URL'] %>
-<% mongohq = URI.parse(ENV['MONGOHQ_URL']) %>
-mongohq:
-  host: <%= mongohq.host %>
-  port: <%= mongohq.port %>
-  database: <%= mongohq.path.sub '/', '' %>
-  username: <%= mongohq.user %>
-  password: <%= mongohq.password %>
-<% end %>
+production:
+  uri: <%= ENV['MONGOHQ_URL'] %>
+<% else %>
 YAML
 
   after_everything do
@@ -33,6 +27,7 @@ after_bundler do
   mongo_yml = "config/mongo#{'id' if recipe?('mongoid')}.yml"
 
   prepend_file mongo_yml, header
+  append_file mongo_yml, '<% end %>'  if config['use_heroku']
   inject_into_file mongo_yml, "  <<: *mongohq\n", :after => "production:\n  <<: *defaults\n"
 end
 

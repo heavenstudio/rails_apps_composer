@@ -3,6 +3,7 @@
 
 if config['rspec']
   gem 'rspec-rails', '>= 2.9.0.rc2', :group => [:development, :test]
+  gem 'simplecov', require: false
   if recipes.include? 'mongoid'
     # use the database_cleaner gem to reset the test database
     gem 'database_cleaner', '>= 0.7.2', :group => :test
@@ -32,10 +33,12 @@ if config['rspec']
     say_wizard "RSpec recipe running 'after bundler'"
     generate 'rspec:install'
     generate 'email_spec:steps'
+    prepend_file 'spec/spec_helper.rb', "require 'simplecov'\nSimpleCov.start 'rails'"
     inject_into_file 'spec/spec_helper.rb', "require 'email_spec'\n", :after => "require 'rspec/rails'\n"
     inject_into_file 'spec/spec_helper.rb', :after => "RSpec.configure do |config|\n" do <<-RUBY
   config.include(EmailSpec::Helpers)
   config.include(EmailSpec::Matchers)
+  #{"config.include(FactoryGirl::Syntax::Methods)" if config['factory_girl']}
 RUBY
     end
     if config['machinist']
@@ -69,14 +72,21 @@ RUBY
       inject_into_file 'spec/spec_helper.rb', :before => "\nend" do
       <<-RUBY
   \n
+  config.include(Mongoid::Matchers)
+  
   # Clean up the database
   require 'database_cleaner'
   config.before(:suite) do
+    DatabaseCleaner.orm      = :mongoid
     DatabaseCleaner.strategy = :truncation
-    DatabaseCleaner.orm = "mongoid"
+    DatabaseCleaner.clean_with(:truncation)
   end
 
   config.before(:each) do
+    DatabaseCleaner.start
+  end
+  
+  config.after(:each) do
     DatabaseCleaner.clean
   end
 RUBY
