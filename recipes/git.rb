@@ -1,9 +1,6 @@
 # Application template recipe for the rails_apps_composer. Check for a newer version here:
 # https://github.com/RailsApps/rails_apps_composer/blob/master/recipes/git.rb
 
-require 'openssl'
-OpenSSL::SSL::VERIFY_PEER = OpenSSL::SSL::VERIFY_NONE
-
 after_everything do
   
   say_wizard "Git recipe running 'after everything'"

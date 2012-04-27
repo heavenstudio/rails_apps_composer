@@ -109,4 +109,9 @@ config:
   - notify:
       prompt: Would you to add notifications? (OS and library dependent)
       type: multiple_choice
-      choices: [["No", no], ["yes, for mac (growl and rb-fsevent)", mac], ["yes, for linux (libnotify and rb-inotify)", linux], ["yes, for windows (rb-fchange, win32console and rb-notifu)", windows], ["yes, all of them with os specific targets (breaks heroku)", all]]
+      choices:
+        - ["No", no]
+        - ["Yes, for mac (growl and rb-fsevent)", mac]
+        - ["Yes, for linux (libnotify and rb-inotify)", linux]
+        - ["Yes, for windows (rb-fchange, win32console and rb-notifu)", windows]
+        - ["Yes, all of them with os specific targets (breaks heroku)", all]

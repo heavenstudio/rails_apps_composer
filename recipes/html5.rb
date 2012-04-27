@@ -11,6 +11,7 @@ case config['css_option']
     # https://github.com/seyhunak/twitter-bootstrap-rails
     # http://railscasts.com/episodes/328-twitter-bootstrap-basics
     gem 'twitter-bootstrap-rails', '>= 2.0.3', :group => :assets
+    gem 'therubyracer', :group => :assets
     recipes << 'bootstrap'
 
   when 'bootstrap_sass'
